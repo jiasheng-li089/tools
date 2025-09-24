@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # coding:utf-8
 
-"""this file to upload image to tiny server to optimize image"""
+"""upload image to tiny server to optimize image"""
 
 __author__ = 'Jiasheng Lee'
 
@@ -9,7 +9,8 @@ __author__ = 'Jiasheng Lee'
 import logging
 import requests
 import json
-import unittest, os
+import unittest
+import os
 
 
 class AuthTokenError (BaseException):

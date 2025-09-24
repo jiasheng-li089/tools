@@ -7,7 +7,11 @@ this module to write channel info to apk which signing with scheme v2
 
 __author__ = 'Jiasheng Lee'
 
-import os, unittest, logging, getopt, sys
+import os
+import unittest
+import logging
+import getopt
+import sys
 
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s\t\t%(asctime)s'

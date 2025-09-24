@@ -15,10 +15,10 @@ import imghdr
 import piexif
 
 
-# png 文件默认结尾
+# default suffix of the PNG files
 _png_end = bytes(b'\x00\x00\x00\x00\x49\x45\x4E\x44\xAE\x42\x60\x82')
 
-# 图片标记
+# flag of the mark
 _const_mark = b'mark&tiny'
 
 class ImageFormatError(BaseException):
@@ -157,7 +157,7 @@ class JPGMarker(Marker):
         the file is not normal image
         """
         exif_dict = piexif.load(self._fileName)
-        if exif_dict is not 0 and '0th' in exif_dict:
+        if exif_dict != 0 and '0th' in exif_dict:
             exif_dict['0th'][piexif.ImageIFD.Copyright] = self._marker
             exif_bytes = piexif.dump(exif_dict)
             piexif.insert(exif_bytes, self._fileName)

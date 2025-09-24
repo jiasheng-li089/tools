@@ -1,12 +1,12 @@
-# 匹配以.开头的文件夹或文件，*nix下的隐藏文件或文件夹
+# ignore files or folders started with '.', the hidden files and folders in *nix system
 ^\.(.+)
-# 匹配以_开头的文件或文件夹
+# ignore files or folder started with '_'
 ^_(.+)
-# 匹配build文件或文件夹
+# ignore the folder `build`
 build
-# 匹配 .txt后缀的文件
+# ignore files with a suffix of '.txt'
 ^(.+)\.txt$
-# 匹配 .py后缀的文件
+# ignore files with a suffix of '.py'
 ^(.+)\.py$
 aidl
 java

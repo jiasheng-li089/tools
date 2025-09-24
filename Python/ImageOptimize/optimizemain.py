@@ -8,7 +8,13 @@ iterate all files in the directory and optimize the image(format png & jpg)
 __author__ = 'Jiasheng Lee'
 
 
-import logging, sys, os, getopt, threadpool, threading, re
+import logging
+import sys
+import os
+import getopt
+import threadpool
+import threading
+import re
 from collections import Iterator
 from optimizeimage import NetworkError, ImageOptimizer
 from imagemark import MarkCheckFactory, ImageFormatError

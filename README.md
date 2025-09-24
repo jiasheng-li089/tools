@@ -1,8 +1,8 @@
-# tools
+# Tools
 
-工具类项目，项目说明如下：
+Description of the sub projects：
 
-* [Android/ApkV2ChannelTools](https://github.com/ljsalm089/tools/tree/master/Android/ApkV2ChannelTools): 针对使用v2签名的apk，获取其对应的渠道信息，渠道信息的写入由Python/ApkV2ChannelTools项目实现。
-* [Python/ApkV2ChannelTools](https://github.com/ljsalm089/tools/tree/master/Python/ApkV2ChannelTools): 针对使用v2签名的apk，写入对应的渠道信息。
-* [Python/ImageOptimize](https://github.com/ljsalm089/tools/tree/master/Python/ImageOptimize): 批量上传png和jpeg文件到tiny服务器进行有损压缩并下载替换原图，并将压缩后的图片打上对应标记，防止二次上传压缩。
+* [Android/ApkV2ChannelTools](./Android/ApkV2ChannelTools): An Android library that can read metadata from the v2 signature blocks of the APK file, which was written by the tool [Python/ApkV2ChannelTools](./Python/ApkV2ChannelTools). 
+* [Python/ApkV2ChannelTools](./Python/ApkV2ChannelTools): A Python tool that writes some metadata (e.g., channel info) into v2 signature blocks of the APK file.
+* [Python/ImageOptimize](./Python/ImageOptimize): A Python tool that can upload batches of PNG and JPG files to the tinypng server for compression. It then downloads these compressed images and replaces the original ones. Finally, the compressed images are marked to prevent repeated handling.A python tool that can upload PNG and JPG files to the tinypng server in batches for compression, download these compressed images and replace the original ones. At last, the compressed images will be marked to avoid being handled repeatedly.
 
