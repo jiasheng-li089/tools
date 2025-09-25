@@ -18,21 +18,19 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s\t\t%(asctime)s'
                     + '\t\tApkV2ChannelsTools\t%(message)s')
 
 _UNIT16_MAX_VALUE = 0xffff
-# eocd 部最小大小
+# the minimum size of the eocd section
 _ZIP_EOCD_REC_MIN_SIZE = 22
-# eocd 部起始标示
+# the start mark of the eocd section
 _ZIP_EOCD_REC_SIGN = bytearray(b'\x06\x05\x4b\x50')
-# eocd comment length 字段在eocd中的偏移量
+# the offset of the field eocd comment length in the EOCD section
 _ZIP_EOCD_COMMENT_LENGTH_FIELD_OFFSET = 20
-# eocd locator 偏移量
-_ZIP64_EOCD_LOCATOR_SIZE = 20
-# eocd locator 起始标示
+# the start mark of the eocd locator
 _ZIP64_EOCD_LOCATOR_SIGN_REVERSE_BYTE_ORDER = 0x07064b50
-# central directory 偏移量字段在eocd段中的偏移量
+# the offset of the field central directory offset in the EOCD section
 _ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_OFFSET = 16
-# central directory 大小字段在eocd端中的偏移量
+# the offset of the central directory size in the EOCD section
 _ZIP_EOCD_CENTRAL_DIR_SIZE_FIELD_OFFSET = 12
-# sign block id 长度
+# the length of sign block id
 _SIGN_EXTRA_ID_LENGTH = 4
 # sign block magic
 _APK_SIGN_BLOCK_MAGIC = bytearray(b'\x32\x34\x20\x6b\x63\x6f\x6c\x42'
@@ -52,8 +50,8 @@ class FileTools(object):
     @staticmethod
     def get_file_size(file):
         """
-        获取文件大小
-        :param file: 对应文件
+        get the size of the file
+        :param file: file path
         :return:
         """
         original_pos = file.tell()
@@ -88,8 +86,8 @@ class FileTools(object):
 
 def _get_eocd_offset_in_file(file):
     """
-    获取eocd部在zip文件中的偏移量
-    :param file: zip文件
+    get the offset of the EOCD section in the zip file
+    :param file: the path of the zip file
     :return:
     """
     file_size = FileTools.get_file_size(file)
@@ -123,9 +121,9 @@ def _get_eocd_offset_in_file(file):
 
 def _get_central_directory_offset_in_file(file, eocd_offset):
     """
-    返回Central Directory部在zip文件中的起始位置
-    :param file: zip文件
-    :param eocd_offset: eocd在文件中的起始位置
+    get the start position of the central directory secion in the zip file
+    :param file: file path of the zip file
+    :param eocd_offset: start position of the EOCD section in the file
     :return:
     """
     file.seek(eocd_offset + _ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_OFFSET,
@@ -146,9 +144,9 @@ def _get_central_directory_offset_in_file(file, eocd_offset):
 def _is_zip64_end_of_central_directory_locator_present(file,
                                                        ecod_offset):
     """
-    判断文件是否zip64格式
-    :param file: 对应文件
-    :param ecod_offset: eocd部在文件中的偏移量
+    chech if the file is zip64 format
+    :param file: file path
+    :param ecod_offset: the start position of the EOCD section in the file
     :return:
     """
     locator_pos = ecod_offset - _ZIP_EOCD_COMMENT_LENGTH_FIELD_OFFSET
@@ -164,10 +162,10 @@ def _is_zip64_end_of_central_directory_locator_present(file,
 
 def _create_channel_data(channel_id, channel_str):
     """
-    构建channel在signing block的数据
-    :param channel_id: 渠道标示id, 字节数组
-    :param channel_str: 渠道信息字符串
-    :return: 返回构建好的byte数组
+    create the meta data that can be inserted into the signing block
+    :param channel_id: the id of the meta data 
+    :param channel_str: the meta data
+    :return: generated data
     """
     if len(channel_id) != _SIGN_EXTRA_ID_LENGTH:
         raise SignatureNotFoundError("channel id length should = %s"
@@ -192,9 +190,9 @@ def _create_channel_data(channel_id, channel_str):
 
 def _get_sign_block_of_apk(file, central_dir_offset):
     """
-    提取apk的signing block部分数据
-    :param file: apk 文件
-    :param central_dir_offset: apk Central Directory在文件中的偏移量
+    extract the data of the signing block
+    :param file: file path of the apk file
+    :param central_dir_offset: the start position of the Central Directory section in the file
     :return:
     """
     file_size = FileTools.get_file_size(file)
@@ -206,7 +204,7 @@ def _get_sign_block_of_apk(file, central_dir_offset):
         raise SignatureNotFoundError('central directory offset should not > ' +
                                      file_size - _ZIP_EOCD_REC_MIN_SIZE)
 
-    # 校验signing block magic
+    # verify the signing block magic
     file.seek(central_dir_offset - 16)
     apk_magic = FileTools.read_little_endian_data(file, 16)
 
@@ -223,22 +221,22 @@ def _get_sign_block_of_apk(file, central_dir_offset):
 
 def _combine_sign_block_and_channel(sign_block, channel_data):
     """
-    合并旧apk的sign block 和渠道信息
+    merge the old signing block and the generated meta data
     :param sign_block: sign block
-    :param channel_data: 渠道信息
-    :return: 返回合并后的数据和增长长度
+    :param channel_data: the generated meta data
+    :return: the merged data and its length
     """
     old_size = len(sign_block)
     new_size = len(sign_block) + len(channel_data)
 
     new_sign_block = bytearray()
 
-    # 生成新的长度
+    # new data length
     new_size_data = (new_size - 8).to_bytes(8, byteorder='little', signed=False)
-    # 新的 size of block
+    # new size of block
     new_sign_block.extend(new_size_data)
 
-    # 拼接signing block
+    # append the signing block
     key_value = sign_block[8: old_size - 24]
     key_value_size = len(key_value)
 
@@ -263,12 +261,12 @@ def _combine_sign_block_and_channel(sign_block, channel_data):
 
         start_pos = start_pos + 8 + values_len
 
-    # 拼接 channel info
+    # append the meta info
     new_sign_block.extend(channel_data)
 
-    # 拼接 size of block
+    # append the size of block
     new_sign_block.extend(new_size_data)
-    # 拼接magic
+    # append the magic number
     new_sign_block.extend(sign_block[old_size - 16: old_size])
     return new_sign_block, new_size - old_size
 
@@ -303,7 +301,7 @@ class ApkChannelTool(object):
 
     def has_extra_info_in_signing_block(self, key_id):
         """
-        判断apk的signing block是否含有key_id
+        check if the signing block contains the key_id
         :param key_id:
         :return:
         """
@@ -339,6 +337,7 @@ class ApkChannelTool(object):
 
     def has_v2_signature(self):
         """
+        check if the apk is signed with Scheme v2
         判断apk是否使用v2进行签名
         :return:
         """
@@ -357,18 +356,18 @@ class ApkChannelTool(object):
                 self._apk.seek(0, os.SEEK_SET)
                 pre_data = self._apk.read(self._central_dir_offset
                                           - len(self._sign_block))
-                # 写signing block前置数据
+                # the data before the signing block
                 new_apk.write(pre_data)
 
-                # 写new signing block
+                # new signing block
                 new_apk.write(new_sign_block)
 
-                # 写 Central Directory 及后置数据
+                # Central Directory and the data after that
                 self._apk.seek(self._central_dir_offset, os.SEEK_SET)
                 tmp = self._apk.read(self._file_size - self._central_dir_offset)
                 new_apk.write(tmp)
 
-                # 修改Central Directory在eocd中的偏移量
+                # modify the offset of the Central Directory in EOCD section
                 new_apk.seek(self._eocd_offset + add_size
                              + _ZIP_EOCD_CENTRAL_DIR_OFFSET_FIELD_OFFSET)
                 new_apk.write((self._central_dir_offset + add_size).to_bytes(
@@ -378,7 +377,6 @@ class ApkChannelTool(object):
 
     def release(self):
         """
-        释放资源
         :return:
         """
         self._apk.close()
